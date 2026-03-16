@@ -1,0 +1,48 @@
+name: Matrix Lab
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        python: ['3.10', '3.11', '3.12']
+      fail-fast: false   # important: lets others continue
+      max-parallel: 2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: pip install requests
+      
+      - name: Create artifact
+        run: echo "Hello from ${{ matrix.python }}" > result.txt
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.python }}
+          path: result.txt
+
+  report:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: results-3.11  # pick one
+          path: downloaded
+      
+      - name: Show result
+        run: cat downloaded/result.txt
