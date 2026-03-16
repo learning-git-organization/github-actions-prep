@@ -1,0 +1,32 @@
+name: Manual Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Name to greet"
+        required: false
+        default: "World"
+      environment:
+        description: "Environment to run against"
+        required: true
+        default: "dev"
+
+jobs:
+  run-manual-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Print workflow inputs
+        run: |
+          echo "Hello ${{ github.event.inputs.name }}"
+          echo "Running in environment: ${{ github.event.inputs.environment }}"
+
+      - name: Show GitHub context
+        run: |
+          echo "Triggered by ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
